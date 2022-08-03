@@ -383,9 +383,9 @@ nakami
         end
       end
 
-      context 'テストケース24(インライン要素はコメントノードの次で改行される)' do
+      context 'テストケース24(インライン要素はコメントノードの次で改行されない)' do
         let(:input) { '<div><span>本文1</span><!-- コメント --><span>本文2</span></div>' }
-        let(:expected) { "<div><span>本文1</span>\r\n<!-- コメント -->\r\n<span>本文2</span>\r\n</div>" }
+        let(:expected) { "<div><span>本文1</span><!-- コメント --><span>本文2</span>\r\n</div>" }
         it { is_expected.to eq expected }
 
         describe '2回formatしても同じか' do
@@ -395,8 +395,8 @@ nakami
       end
 
       context 'テストケース25(インライン要素の次に改行があったら保持される)' do
-        let(:input) { '<div><span>本文1</span><!-- コメント --><span>本文2</span></div>' }
-        let(:expected) { "<div><span>本文1</span>\r\n<!-- コメント -->\r\n<span>本文2</span>\r\n</div>" }
+        let(:input) { "<div><span>本文1</span>\r\n  <!-- コメント -->      <span>本文2</span></div>" }
+        let(:expected) { "<div><span>本文1</span>\r\n<!-- コメント --> <span>本文2</span>\r\n</div>" }
         it { is_expected.to eq expected }
 
         describe '2回formatしても同じか' do
@@ -445,6 +445,17 @@ nakami
       context 'テストケース29(ルビ周りでは改行を挿入しない)' do
         let(:input) { '<p>ほげほげの<ruby>振り仮名<rp>(</rp><rt>ふりがな</rt><rp>)</rp></ruby>がほげほげ。</p>' }
         let(:expected) { "<p>ほげほげの<ruby>振り仮名<rp>(</rp><rt>ふりがな</rt><rp>)</rp></ruby>がほげほげ。</p>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース30(コメントノードはインライン扱い。改行含む改行スペースあったら改行1個、スペースあったらスペース1個、なにもなければないまま)' do
+        let(:input) { '<p>あけまして<!-- コメント -->おめでとう</p>' }
+        let(:expected) { "<p>あけまして<!-- コメント -->おめでとう</p>" }
         it { is_expected.to eq expected }
 
         describe '2回formatしても同じか' do
