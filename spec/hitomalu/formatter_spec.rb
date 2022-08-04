@@ -64,7 +64,7 @@ nakami
 </div>
 
 <div><p><b>ここは1行で書いた</b></p></div>' }
-        let(:expected) { "<p>チェック検証用</p>\r\n<h2>概要</h2>\r\n<p>タグの外側の空白や</p>\r\n<p>最初のでは</p>\r\n<div>\r\n<p>すごくインデント</p>\r\n<p>この文章の前に改行やインデント</p>\r\n</div>\r\n<div>\r\n<p><b>ここは1行で書いた</b>\r\n</p>\r\n</div>" }
+        let(:expected) { "<p>チェック検証用</p>\r\n<h2>概要</h2>\r\n<p>タグの外側の空白や</p>\r\n<p>最初のでは</p>\r\n<div>\r\n<p>すごくインデント</p>\r\n<p>この文章の前に改行やインデント</p>\r\n</div>\r\n<div>\r\n<p><b>ここは1行で書いた</b></p>\r\n</div>" }
         it { is_expected.to eq expected }
 
         describe '2回formatしても同じか' do
@@ -257,7 +257,7 @@ nakami
   <td>td2-2
   <td>td2-3
 </table>' }
-        let(:expected) { "<a href=\"example.com\">\r\n<p>pタグも閉じるのを省略してみた</p>\r\n</a>\r\n<table>\r\n<thead>\r\n<tr>\r\n<th>th1</th>\r\n<th>th2</th>\r\n<th>th3</th>\r\n</tr>\r\n</thead>\r\n<tbody>\r\n<tr>\r\n<td>td1-1</td>\r\n<td>td1-2</td>\r\n<td>td1-3</td>\r\n</tr>\r\n<tr>\r\n<td>td2-1</td>\r\n<td>td2-2</td>\r\n<td>td2-3</td>\r\n</tr>\r\n</tbody>\r\n</table>" }
+        let(:expected) { "<a href=\"example.com\">\r\n<p>pタグも閉じるのを省略してみた</p></a>\r\n<table>\r\n<thead>\r\n<tr>\r\n<th>th1</th>\r\n<th>th2</th>\r\n<th>th3</th>\r\n</tr>\r\n</thead>\r\n<tbody>\r\n<tr>\r\n<td>td1-1</td>\r\n<td>td1-2</td>\r\n<td>td1-3</td>\r\n</tr>\r\n<tr>\r\n<td>td2-1</td>\r\n<td>td2-2</td>\r\n<td>td2-3</td>\r\n</tr>\r\n</tbody>\r\n</table>" }
         it { is_expected.to eq expected }
 
         describe '2回formatしても同じか' do
@@ -456,6 +456,43 @@ nakami
       context 'テストケース30(コメントノードはインライン扱い。改行含む改行スペースあったら改行1個、スペースあったらスペース1個、なにもなければないまま)' do
         let(:input) { '<p>あけまして<!-- コメント -->おめでとう</p>' }
         let(:expected) { "<p>あけまして<!-- コメント -->おめでとう</p>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース31(インライン要素の閉じタグが連続しても改行やスペースは追加されない)' do
+        let(:input) { '<span>あけまして<a href="example.com">おめでとう</a></span>' }
+        let(:expected) { "<span>あけまして<a href=\"example.com\">おめでとう</a></span>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース32(インライン要素の閉じタグが連続してる間に改行やスペースがあったら1個になる)' do
+        let(:input) { '<b><span>あけまして<a href="example.com">おめでとう</a>
+
+    </span>    </b>' }
+        let(:expected) { "<b><span>あけまして<a href=\"example.com\">おめでとう</a>\r\n</span> </b>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース33(ブロック要素の閉じタグの前には自動で改行が入り、改行1つになる)' do
+        let(:input) { '<div>あけまして<p>おめでとう</p></div><div>今年も<p>よろしく</p>
+    
+    </div>' }
+        let(:expected) { "<div>あけまして\r\n<p>おめでとう</p>\r\n</div>\r\n<div>今年も\r\n<p>よろしく</p>\r\n</div>" }
         it { is_expected.to eq expected }
 
         describe '2回formatしても同じか' do

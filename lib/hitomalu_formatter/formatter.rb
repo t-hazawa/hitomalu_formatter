@@ -8,6 +8,7 @@ module Hitomalu
     # rp と rt は上に記載がないが、改行させたくないので追加
     # node.name が 'comment' であるコメントノードもインライン扱い
     INLINE_TAGS = [ 'a', 'abbr', 'acronym', 'audio', 'b', 'bdi', 'bdo', 'big', 'br', 'button', 'canvas', 'cite', 'code', 'comment', 'data', 'datalist', 'del', 'dfn', 'em', 'embed', 'i', 'iframe', 'img', 'input', 'ins', 'kbd', 'label', 'map', 'mark', 'meter', 'noscript', 'object', 'output', 'picture', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'script', 'select', 'slot', 'small', 'span', 'strong', 'sub', 'sup', 'svg', 'template', 'textarea', 'time', 'u', 'tt', 'var', 'video', 'wbr' ]
+    INLINE_TAGS_REGEXP = INLINE_TAGS.join('|')
 
     def self.format(html)
       # 改行コード \n を \r\n に統一しておく
@@ -73,11 +74,11 @@ module Hitomalu
       body_str = body.to_s.gsub(/(\|mykaigyo\|)+/, "\r\n").gsub('|myspace|', ' ').gsub(/(<\/wbr>|\|mykaramojiretsu\||\A<body>(\n|\r\n)*|(\n|\r\n)*<\/body>\Z)/, "").gsub(/(?<!\r)\n/, "\r\n")
       
       # </span></div> のような閉じタグの間に改行が無かったら改行を入れる (Nokogiri の add_next_sibling は 20000回するとメモリを6GB以上使うので文字列処理でやる)
-      # ただし、</ruby>の前には入れない(</rp>などの短いインライン要素が来るため)
+      # ただし、片方または両方がインライン要素の閉じタグだったら入れない
       prev_str = ""
       while body_str != prev_str do
           prev_str = body_str
-          body_str = body_str.gsub(/(<\/[a-z]+>)(<\/(?!ruby))/, "\\1\r\n\\2")
+          body_str = body_str.gsub(/(<\/(?!(#{INLINE_TAGS_REGEXP}))[a-z]+>)(<\/(?!(#{INLINE_TAGS_REGEXP}))[a-z]+>)/, "\\1\r\n\\3")
       end
 
       # 開始タグの前に改行がなければ改行を入れる (add_prev_sibling は重いので文字列処理でやる) (文章の先頭からは消す)
