@@ -87,7 +87,7 @@ nakami
         <b>ここは1行で書いた</b>
     </p>
 </div>' }
-        let(:expected) { "<p>チェック検証用</p>\r\n<h2>概要</h2>\r\n<p>タグの外側の空白や</p>\r\n<p>最初のでは</p>\r\n<div>\r\n<p>すごくインデント</p>\r\n<p>この文章の前に改行やインデント</p>\r\n</div>\r\n<div>\r\n<p><b>ここは1行で書いた</b>\r\n</p>\r\n</div>" }
+        let(:expected) { "<p>チェック検証用</p>\r\n<h2>概要</h2>\r\n<p>タグの外側の空白や</p>\r\n<p>最初のでは</p>\r\n<div>\r\n<p>すごくインデント</p>\r\n<p>この文章の前に改行やインデント</p>\r\n</div>\r\n<div>\r\n<p>\r\n<b>ここは1行で書いた</b>\r\n</p>\r\n</div>" }
         it { is_expected.to eq expected }
 
         describe '2回formatしても同じか' do
@@ -146,7 +146,7 @@ nakami
 
 
 </details>' }
-        let(:expected) { "<details>\r\n<summary>Details</summary>\r\nSomething small</details>" }
+        let(:expected) { "<details>\r\n<summary>Details</summary>\r\n Something small</details>" }
         it { is_expected.to eq expected }
 
         describe '2回formatしても同じか' do
@@ -188,7 +188,7 @@ nakami
     <summary>Details</summary>
     Something small enough to escape casual notice.
 </details>' }
-        let(:expected) { "<details>\r\n<summary>Details</summary>\r\nSomething small enough to escape casual notice.</details>" }
+        let(:expected) { "<details>\r\n<summary>Details</summary>\r\n Something small enough to escape casual notice.</details>" }
         it { is_expected.to eq expected }
 
         describe '2回formatしても同じか' do
@@ -206,7 +206,7 @@ nakami
 <rt>じ</rt>
 <rp>)</rp>
 </ruby>' }
-        let(:expected) { "<ruby>漢<rp>(</rp>\r\n<rt>かん</rt>\r\n<rp>)</rp>字<rp>(</rp>\r\n<rt>じ</rt>\r\n<rp>)</rp>\r\n</ruby>" }
+        let(:expected) { "<ruby>漢<rp>(</rp>\r\n<rt>かん</rt>\r\n<rp>)</rp> 字<rp>(</rp>\r\n<rt>じ</rt>\r\n<rp>)</rp>\r\n</ruby>" }
         it { is_expected.to eq expected }
 
         describe '2回formatしても同じか' do
@@ -420,7 +420,7 @@ nakami
         let(:input) { '<address>
   <a href="mailto:jim@rock.com">jim@rock.com</a>
 </address>' }
-        let(:expected) { "<address><a href=\"mailto:jim@rock.com\">jim@rock.com</a>\r\n</address>" }
+        let(:expected) { "<address>\r\n<a href=\"mailto:jim@rock.com\">jim@rock.com</a>\r\n</address>" }
         it { is_expected.to eq expected }
 
         describe '2回formatしても同じか' do
@@ -500,5 +500,135 @@ nakami
           it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
         end
       end
+
+      context 'テストケース34(インライン要素の後の半角スペースが保持されるかチェック)' do
+        let(:input) { '<p>2022<a href="http://example.com/">hello</a> world</p>' }
+        let(:expected) { "<p>2022<a href=\"http://example.com/\">hello</a> world</p>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース35(インライン要素の前の半角スペースが保持されるかチェック)' do
+        let(:input) { '<p><span>2022 </span><a href="http://example.com/">hello</a>world</p>' }
+        let(:expected) { "<p><span>2022 </span><a href=\"http://example.com/\">hello</a>world</p>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース36(インライン要素の前後に半角スペースが無い時にない状態が保持されるかチェック)' do
+        let(:input) { '<p><span>2022</span><a href="http://example.com/">hello</a>world</p>' }
+        let(:expected) { "<p><span>2022</span><a href=\"http://example.com/\">hello</a>world</p>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース37(連続する2つ以上の半角スペースは1つになる)' do
+        let(:input) { '<p><span>hello         world</span></p>' }
+        let(:expected) { "<p><span>hello world</span></p>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース38(nobrはインライン要素扱いなので改行が入ったりしない)' do
+        let(:input) { '<p>改行可能ゾーン<nobr>この間では改行されない</nobr>改行可能ゾーン2</p>' }
+        let(:expected) { "<p>改行可能ゾーン<nobr>この間では改行されない</nobr>改行可能ゾーン2</p>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース39(インライン要素の前後の改行がスペースになる)' do
+        let(:input) { '<p><b>hoge1
+<span>hoge2</span>
+hoge3</b>
+hoge4
+hoge5
+hoge6
+</p>' }
+        let(:expected) { "<p><b>hoge1 <span>hoge2</span> hoge3</b> hoge4 hoge5 hoge6</p>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース40(ブロック要素の中身の最初と最後のスペースはなくなる)' do
+        let(:input) { '<p>   hoge    </p>' }
+        let(:expected) { "<p>hoge</p>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース41(コメントの前後に改行混じりスペースやスペースがあったら1個だけにする(インライン扱い))' do
+        let(:input) { '<span>本文</span>
+    <!-- ここに中身があります -->    <span>中身</span>' }
+        let(:expected) { "<span>本文</span>\r\n<!-- ここに中身があります --> <span>中身</span>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース42(インライン要素の間にスペースがあったら1つにして残す)' do
+        let(:input) { '<p><span>本文</span>     <span>中身2</span></p>' }
+        let(:expected) { "<p><span>本文</span> <span>中身2</span></p>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース43(ブロック要素の閉じタグの間に改行があっても改行だけになって、スペースが入ったりしない)' do
+        let(:input) { '<div><p>本文</p>
+</div>' }
+        let(:expected) { "<div>\r\n<p>本文</p>\r\n</div>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース44(ブロック要素の閉じタグと開始タグの間にスペースがあっても、それは消えて改行だけになる)' do
+        let(:input) { '<div>本文1</div> <p>本文2</p>' }
+        let(:expected) { "<div>本文1</div>\r\n<p>本文2</p>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
     end
 end
