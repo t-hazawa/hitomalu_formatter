@@ -630,5 +630,34 @@ hoge6
         end
       end
 
+      context 'テストケース45(preの中の改行は保持される)' do
+        let(:input) { '<pre>
+<b>hoge hoge
+hoge hoge</b>
+hoge hoge
+</pre>' }
+        let(:expected) { "<pre>\r\n<b>hoge hoge\r\nhoge hoge</b>\r\nhoge hoge\r\n</pre>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース46(preの中の改行は保持される2)' do
+        let(:input) { '<pre><b>hoge hoge
+hoge hoge</b>
+hoge hoge
+</pre>' }
+        let(:expected) { "<pre><b>hoge hoge\r\nhoge hoge</b>\r\nhoge hoge\r\n</pre>" }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
     end
 end

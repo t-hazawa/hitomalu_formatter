@@ -89,7 +89,7 @@ module Hitomalu
         # 英文など、スペースが重要な言語があるので、stripはしない (Hello <a href="#world">world</a> のような文でスペースが、stripで無くなってしまう)
         # \r\n を 2文字で1つのもの扱いにするため \s ではなく () で列挙している
         # 連続する改行・スペースをスペース1つにし、先頭と最後の改行・スペースを除去し、文中の改行を除去する
-        if node.instance_of?(Nokogiri::XML::Text) && !CONTENT_NO_MODIFY_TAGS.include?(node.parent.name)
+        if node.instance_of?(Nokogiri::XML::Text) && (CONTENT_NO_MODIFY_TAGS & node.ancestors.map do |ancestor| ancestor.name end).empty?
           node.content = node.content.gsub(/(\r\n|\n| |\t|\f){2,}/, " ").gsub(/(\A ?(\r\n|\n) ?| ?(\r\n|\n) ?\Z)/, " ").gsub("\r\n", " ")
         end
 

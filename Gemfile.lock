@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    hitomalu_formatter (0.1.4)
+    hitomalu_formatter (0.1.5)
 
 GEM
   remote: https://rubygems.org/
