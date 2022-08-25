@@ -69,7 +69,7 @@ module Hitomalu
         end
 
         # </span>\n</div> を </span>\n</div> のままにしたいが、Nokogiri は閉じタグ間の\nを消すので一旦 |mykaigyo| にする (整形を2回かけた時用)
-        if node.instance_of?(Nokogiri::XML::Element) && !node.next_sibling.nil? && /\A\s*(\n|\r\n)\s*\Z/.match?(node.next_sibling.content) && node.next_sibling.next_sibling.nil?
+        if node.instance_of?(Nokogiri::XML::Element) && !node.next_sibling.nil? && /\A\s*(\n|\r\n)\s*\Z/.match?(node.next_sibling.to_s) && node.next_sibling.next_sibling.nil?
           node.next_sibling.content = "|mykaigyo|"
         end
 

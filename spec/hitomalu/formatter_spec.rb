@@ -659,5 +659,30 @@ hoge hoge
         end
       end
 
+      context 'テストケース47(あるタグの中に2つタグがあって、後ろの方で閉じタグが連続していて、その中にbrがあっても中身が消えたりしない)' do
+        let(:input) { '<p>abc<span><span><img src="/1.png"></span><nobr><span><img src="/2.png"><br/>
+<img src="/3.png"><img src="/4.png"></span></nobr></span></p>' }
+        let(:expected) { '<p>abc<span><span><img src="/1.png"></span><nobr><span><img src="/2.png"><br>
+<img src="/3.png"><img src="/4.png"></span></nobr></span></p>'.gsub(/\n/, "\r\n") }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
+
+      context 'テストケース48(あるタグの中に2つタグがあって、後ろの方で閉じタグが連続していて、その中にbrがあって、テキストがそこにあっても中身が消えたりしない)' do
+        let(:input) { '<p>abc<span><span><img src="/1.png"></span><nobr><span><img src="/2.png"><br/>
+<img src="/3.png">moji<img src="/4.png"></span></nobr></span></p>' }
+        let(:expected) { '<p>abc<span><span><img src="/1.png"></span><nobr><span><img src="/2.png"><br>
+<img src="/3.png">moji<img src="/4.png"></span></nobr></span></p>'.gsub(/\n/, "\r\n") }
+        it { is_expected.to eq expected }
+
+        describe '2回formatしても同じか' do
+          let(:input2) { Hitomalu::Formatter.format(input) }
+          it { expect(Hitomalu::Formatter.format(input2)).to eq expected }
+        end
+      end
     end
 end
